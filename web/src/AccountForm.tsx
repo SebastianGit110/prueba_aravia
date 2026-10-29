@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { accountsApi, ApiError } from "./api";
+import { createAccount, isApiError } from "./api";
 import { LEVEL_LABEL, NATURE_LABEL, parentCode, validateNewAccount } from "./domain";
 import type { Account, AccountField, FieldErrors, Nature } from "./types";
 
@@ -63,14 +63,14 @@ export function AccountForm({ accounts, onCreated }: Props) {
     // 2) Envío + errores del servidor junto a cada campo.
     setSubmitting(true);
     try {
-      await accountsApi.create(input);
+      await createAccount(input);
       await onCreated();
       setSuccess(`Cuenta ${input.code} · ${input.name} creada.`);
       setCode("");
       setName("");
       setNature("");
     } catch (err) {
-      if (err instanceof ApiError) {
+      if (isApiError(err)) {
         const fieldErrors: FieldErrors = {};
         for (const f of FIELDS) if (err.fieldErrors[f]) fieldErrors[f] = err.fieldErrors[f];
         setErrors(fieldErrors);

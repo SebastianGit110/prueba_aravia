@@ -1,51 +1,18 @@
-import type { Account, CreateAccountInput, FieldErrors } from "./types";
+import { http } from "./http";
+import type { Account, CreateAccountInput } from "./types";
 
-const BASE = import.meta.env.VITE_API_URL ?? "/api";
+export { isApiError } from "./api-error";
 
-/**
- * Contrato asumido de errores de la API:
- *   422 { message, errors: { code?: string, name?: string, nature?: string } }
- *   409 { message }   (p. ej. eliminar una cuenta con hijas)
- * Ajusta `request` si tu backend usa otro formato.
- */
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public fieldErrors: FieldErrors = {},
-  ) {
-    super(message);
-  }
+export async function listAccounts(signal?: AbortSignal): Promise<Account[]> {
+  const { data } = await http.get<Account[]>("/accounts", { signal });
+  return data;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(`${BASE}${path}`, {
-      headers: { "Content-Type": "application/json" },
-      ...init,
-    });
-  } catch {
-    throw new ApiError("No se pudo conectar con el servidor.", 0);
-  }
-
-  if (res.status === 204) return undefined as T;
-  const body = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new ApiError(
-      body?.message ?? "Ocurrió un error inesperado.",
-      res.status,
-      body?.errors ?? {},
-    );
-  }
-  return body as T;
+export async function createAccount(input: CreateAccountInput): Promise<Account> {
+  const { data } = await http.post<Account>("/accounts", input);
+  return data;
 }
 
-export const accountsApi = {
-  list: (signal?: AbortSignal) => request<Account[]>("/accounts", { signal }),
-  create: (input: CreateAccountInput) =>
-    request<Account>("/accounts", { method: "POST", body: JSON.stringify(input) }),
-  remove: (code: string) =>
-    request<void>(`/accounts/${code}`, { method: "DELETE" }),
-};
+export async function removeAccount(code: string): Promise<void> {
+  await http.delete(`/accounts/${encodeURIComponent(code)}`);
+}

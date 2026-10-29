@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { accountsApi, ApiError } from "./api";
+import { isApiError, removeAccount } from "./api";
 import type { Account } from "./types";
 
 interface Props {
@@ -32,13 +32,13 @@ export function DeleteAccountDialog({ account, onClose, onDeleted }: Props) {
     setDeleting(true);
     setError(null);
     try {
-      await accountsApi.remove(account.code);
+      await removeAccount(account.code);
       await onDeleted();
       onClose();
     } catch (err) {
       // Ej.: "No se puede eliminar: la cuenta tiene cuentas hijas."
       setError(
-        err instanceof ApiError
+        isApiError(err)
           ? err.message
           : "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
       );

@@ -1,5 +1,6 @@
+import { isCancel } from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { accountsApi } from "./api";
+import { listAccounts } from "./api";
 import { buildTree } from "./domain";
 import type { Account } from "./types";
 
@@ -14,11 +15,11 @@ export function useAccounts() {
   const load = useCallback(async (opts?: { silent?: boolean; signal?: AbortSignal }) => {
     if (!opts?.silent) setStatus("loading");
     try {
-      setAccounts(await accountsApi.list(opts?.signal));
+      setAccounts(await listAccounts(opts?.signal));
       setError(null);
       setStatus("ready");
     } catch (e) {
-      if ((e as Error).name === "AbortError") return;
+      if (isCancel(e)) return; // la petición se canceló al desmontar
       setError((e as Error).message);
       setStatus("error");
     }
