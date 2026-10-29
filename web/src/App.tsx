@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { apiUrl } from './api'
+import { apiUrl } from './api2'
 
 type Estado =
   | { tipo: 'cargando' }
