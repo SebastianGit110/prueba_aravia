@@ -1,0 +1,18 @@
+{
+  "name": "tech-assessment-starter-fullstack",
+  "private": true,
+  "description": "Punto de partida de la prueba técnica full-stack. NestJS y React pelados, sin estructura de capas.",
+  "scripts": {
+    "setup": "npm install --prefix api && npm install --prefix web",
+    "dev": "concurrently --names api,web --prefix-colors blue,magenta \"npm run start:dev --prefix api\" \"npm run dev --prefix web\"",
+    "dev:api": "npm run start:dev --prefix api",
+    "dev:web": "npm run dev --prefix web",
+    "build": "npm run build --prefix api && npm run build --prefix web",
+    "test": "npm test --prefix api",
+    "lint": "npm run lint --prefix api && npm run lint --prefix web",
+    "postinstall": "npm install --prefix api && npm install --prefix web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
